@@ -9,7 +9,7 @@
 
 ## Import/Munge Angling
 # Read angling point events
-angling_hotspots_raw <- read.csv("../data/IB_Data_Mar18.csv", header=TRUE, na.strings=NULL, stringsAsFactors=F)
+angling_hotspots_raw <- read.csv("./data/IB_Data_Mar18.csv", header=TRUE, na.strings=NULL, stringsAsFactors=F)
 angling_hotspots <- angling_hotspots_raw
 
 # Format timestamps
@@ -20,7 +20,7 @@ angling_hotspots$date <- as.Date(with_tz(angling_hotspots$timestamp, tzone="Amer
 angling_hotspots$hour <- hour(with_tz(angling_hotspots$timestamp, tzone="America/Denver"))
 
 # drop extraneous variables
-angling_hotspots <- angling_hotspots[,-c(5:20,23)]
+angling_hotspots <- angling_hotspots[,c("hotspot_id", "latitude", "longitude", "bobber_id", "date", "hour")]
 
 # Subset 2017 records
 angling_hotspots <- angling_hotspots[which((angling_hotspots$date > "2016-12-31") & (angling_hotspots$date < "2018-01-01")), names(angling_hotspots) %in% c("hotspot_id", "latitude", "longitude", "bobber_id", "date", "hourMT")]
@@ -32,7 +32,7 @@ angling_hotspots <- angling_hotspots[angling_hotspots$latitude > 45 & angling_ho
 ## Import/Munge Waterbodies
 # Read NHD spatial data
 library(rgdal)
-NHD_WA_raw <- readOGR(dsn="../data/", layer="NHDWaterbody_albers", stringsAsFactors=F)
+NHD_WA_raw <- readOGR(dsn="./data/", layer="NHDWaterbody_albers", stringsAsFactors=F)
 NHD_WA <- NHD_WA_raw
 
 # Filter NHD to lakes
@@ -63,7 +63,4 @@ angling_hotspots_wat$uniq <- !duplicated(angling_hotspots_wat$bdoID)
 toa <- angling_hotspots_wat[angling_hotspots_wat$uniq==T,c("bobber_id","date","OBJECTID")]
 
 # Write table to analyse
-write.csv(toa, "../analysis/anglingXwater.csv", row.names=F)
-
-
-
+write.csv(toa, "./analysis/anglingXwater.csv", row.names=F)
