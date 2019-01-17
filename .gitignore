@@ -3,3 +3,4 @@ analysis/*
 angling.Rproj/*
 .Rproj*
 .DS_Store
+.Rhistory*
