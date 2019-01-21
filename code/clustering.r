@@ -7,16 +7,28 @@ aud <- read.csv("./analysis/anglingXwater.csv", header=TRUE, na.strings=NULL, st
 
 # Reformat and delete missing values
 aud$date <- as.Date(aud$date)
-aud$OBJECTID <- as.numeric(aud$OBJECTID)
+aud$Permanent_ <- as.numeric(aud$Permanent_)
 aud_clean <- na.omit(aud)
 
-# Standardize the data
-aud_scaled <- scale(aud_clean)
+# Determine number of clusters using elbow method
+library(klaR)
 
-# Determine number of clusters
+# Compute and plot within diff for k = 2 to k = 20.
+k.max <- 20
+wss <- sapply(1:k.max, 
+              function(k){set.seed(100000)
+                sum(kmodes(aud_clean, k, iter.max = 100 ,weighted = FALSE)$withindiff)})
+wss
 
+plot(1:k.max, wss,
+     type="b", pch = 19, frame = FALSE, 
+     xlab="Number of clusters K",
+     ylab="Total within-clusters sum of squares")
 
-# K-Means Cluster Analysis
-aud_k <- kmeans(aud_scaled[,3], centers = 10, nstart = 25)
+# K-Modes Cluster Analysis
+cluster.results <-kmodes(aud_clean, 6 ,iter.max = 100, weighted = FALSE ) 
+print(cluster.results)
 
 # Append cluster assignment
+kmclust <- factor(cluster.results$cluster)
+aud_clean$cluster <- kmclust
