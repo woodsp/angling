@@ -4,19 +4,28 @@
 ### run from top-level directory of angling repository
 ###
 
-library("vegan", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
-library("simba", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
-library("cluster", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
-library("ecodist", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
-library("gclus", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
-library("pastecs", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
-library("NbClust", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
-library("clusteval", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
-library("MASS", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
+install.packages("vegan")
+install.packages("simba")
+install.packages("cluster")
+install.packages("ecodist")
+install.packages("gclus")
+install.packages("pastecs")
+install.packages("NbClust")
+install.packages("clusteval")
+install.packages("MASS")
+library("vegan")
+library("simba")
+library("cluster")
+library("ecodist")
+library("gclus")
+library("pastecs")
+library("NbClust")
+library("clusteval")
+library("MASS")
 
 # ----------------------------------------------------------------------------
 # Read data and variable screening
-aud <- read.csv("./analysis/anglingXwater.csv", header=TRUE, na.strings=NULL, stringsAsFactors=F)
+angler <- read.csv("./analysis/anglingXwater.csv", header=TRUE, na.strings=NULL, stringsAsFactors=F)
 
 # remove first column containing user names
 angler[1]<-NULL
