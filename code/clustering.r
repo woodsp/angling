@@ -1,41 +1,77 @@
 
 ###
 ### K-Means clustering of lakes
-###   run from top-level directory of angling repository
+### run from top-level directory of angling repository
 ###
 
-# Read trip matrix
+library("vegan", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
+library("simba", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
+library("cluster", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
+library("ecodist", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
+library("gclus", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
+library("pastecs", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
+library("NbClust", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
+library("clusteval", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
+library("MASS", lib.loc="/Library/Frameworks/R.framework/Versions/3.4/Resources/library")
+
+# ----------------------------------------------------------------------------
+# Read data and variable screening
 aud <- read.csv("./analysis/anglingXwater.csv", header=TRUE, na.strings=NULL, stringsAsFactors=F)
 
-# Reformat and delete missing values
-aud$date <- as.Date(aud$date)
-aud$PermID <- as.numeric(aud$PermID)
-aud_clean <- na.omit(aud)
+# remove first column containing user names
+angler[1]<-NULL
+str(angler)
+dim(angler)
 
-# Create table of users (rows) by lakes (cols)
-#  with number of visits as cell values
-library(reshape2)
-aud_clean_wide <- dcast(aud_clean, bobber_id ~ PermID, value.var="PermID", length)
+# abbreviate names (not used)
+#temp_names<-abbreviate(row.names(angler))
 
+# ----------------------------------------------------------------------------
+# Multivariate Resemblance 
 
-# Determine number of clusters using elbow method
-library(klaR)
+# CALCULATING COEFFICIENTS OF SIMILARITY FOR LAKES ACCORDING TO USER VISITATION
+angler.jac <- sim(angler, method = "jaccard")
 
-# Compute and plot within diff for k=2 to k=20.
-k.max <- 20
-wss <- sapply(1:k.max, function(k) {
-                set.seed(100000)
-                sum(kmodes(aud_clean, k, iter.max=100, weighted=FALSE)$withindiff)
-              })
+# ---------------------------------------------------------------------------
+# Hierarchical Cluster Analysis 
 
-plot(1:k.max, wss, type="b", pch=19, frame=FALSE, xlab="Number of clusters K", ylab="Total within-clusters sum of squares")
+# Average linkage (UPGMA)
+angler.jacd<-vegdist(angler,method='jaccard')
+anglercl.ave<-hclust(angler.jacd,method='average')
+plot(anglercl.ave) 
 
-# K-Modes Cluster Analysis
-cluster.results <-kmodes(aud_clean, 6 ,iter.max=100, weighted=FALSE) 
-print(cluster.results)
+# clustering performance
+coef.hclust(anglercl.ave) 
+hclus.cophenetic(angler.jacd,anglercl.ave)
 
-# Append cluster assignment
-aud_clean$cluster <- factor(cluster.results$cluster)
+# scree plot
+hclus.scree(anglercl.ave)
 
+# Ward's Method
+anglercl.ward<-hclust(angler.jacd,method='ward.D2')
+plot(anglercl.ward) 
+plot(anglercl.ave,main='Average-linkage Dendrogram',xlab='Anglers',ylab='Jaccard Dissimilar')
 
+# clustering performance
 
+coef.hclust(anglercl.ward) 
+hclus.cophenetic(angler.jacd,anglercl.ward)
+
+# scree plot
+hclus.scree(anglercl.ward)
+
+# ------------------------------------------------------------------------
+# Non-hierarchical Cluster Analysis 
+
+nhclus.scree(angler.jacd,max.k=30)
+
+anglercl.kmeans<-kmeans(angler.jacd,centers=10,iter.max=10000,nstart=25)
+anglercl.kmeans$cluster
+anglercl.class<-anglercl.kmeans$cluster
+names(anglercl.kmeans)
+
+plot(silhouette(anglercl.kmeans$cluster,angler.jacd))
+
+anglercl.kmeans.cas<-cascadeKM(angler.jacd,inf.gr=3,sup.gr=10,iter=100)
+plot(anglercl.kmeans.cas,sortg=T)
+anglercl.kmeans.cas$results
