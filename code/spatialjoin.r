@@ -121,6 +121,8 @@ outangledf <- do.call("rbind",outangle)
 ## Export waterbody x state and angling by waterbody linking tables
 write.csv(outlakesdf, "data/waterbody2state.csv", row.names=F)
 write.csv(outangledf, "data/ibobber2waterbody.csv", row.names=F)
+# outlakesdf <- read.csv("data/waterbody2state.csv")
+# outangledf <- read.csv("data/ibobber2waterbody.csv")
 
 ## Bind waterbody metadata onto angling events
 ahp <- merge(angling_hotspots, outangledf, by="hotspot_id", all.x=T)
@@ -132,7 +134,7 @@ ahps$bdoID <- paste(ahps$bobber_id, ahps$PERMANENT_IDENTIFIER, ahps$date, sep='x
 ahps$uniq <- !duplicated(ahps$bdoID)
 
 # Table for first round of analyses
-toa <- ahps[ahps$uniq==T,c("bobber_id","date","PERMANENT_IDENTIFIER","latitude_cent","longitude_cent")]
+toa <- ahps[ahps$uniq==T,c("bobber_id","date","PERMANENT_IDENTIFIER","latitude_cent","longitude_cent","state")]
 
 # Write table to analyse
 write.csv(toa, "./analysis/anglingXwater.csv", row.names=F)
