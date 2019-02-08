@@ -1,41 +1,86 @@
 
 ###
 ### K-Means clustering of lakes
-###   run from top-level directory of angling repository
+### run from top-level directory of angling repository
 ###
 
-# Read trip matrix
-aud <- read.csv("./analysis/anglingXwater.csv", header=TRUE, na.strings=NULL, stringsAsFactors=F)
+install.packages("vegan")
+install.packages("simba")
+install.packages("cluster")
+install.packages("ecodist")
+install.packages("gclus")
+install.packages("pastecs")
+install.packages("NbClust")
+install.packages("clusteval")
+install.packages("MASS")
+library("vegan")
+library("simba")
+library("cluster")
+library("ecodist")
+library("gclus")
+library("pastecs")
+library("NbClust")
+library("clusteval")
+library("MASS")
 
-# Reformat and delete missing values
-aud$date <- as.Date(aud$date)
-aud$PermID <- as.numeric(aud$PermID)
-aud_clean <- na.omit(aud)
+# ----------------------------------------------------------------------------
+# Read data and variable screening
+angler <- read.csv("./analysis/anglingXwater.csv", header=TRUE, na.strings=NULL, stringsAsFactors=F)
 
-# Create table of users (rows) by lakes (cols)
-#  with number of visits as cell values
-library(reshape2)
-aud_clean_wide <- dcast(aud_clean, bobber_id ~ PermID, value.var="PermID", length)
+# remove first column containing user names
+angler[1]<-NULL
+str(angler)
+dim(angler)
 
+# abbreviate names (not used)
+#temp_names<-abbreviate(row.names(angler))
 
-# Determine number of clusters using elbow method
-library(klaR)
+# ----------------------------------------------------------------------------
+# Multivariate Resemblance 
 
-# Compute and plot within diff for k=2 to k=20.
-k.max <- 20
-wss <- sapply(1:k.max, function(k) {
-                set.seed(100000)
-                sum(kmodes(aud_clean, k, iter.max=100, weighted=FALSE)$withindiff)
-              })
+# CALCULATING COEFFICIENTS OF SIMILARITY FOR LAKES ACCORDING TO USER VISITATION
+angler.jac <- sim(angler, method = "jaccard")
 
-plot(1:k.max, wss, type="b", pch=19, frame=FALSE, xlab="Number of clusters K", ylab="Total within-clusters sum of squares")
+# ---------------------------------------------------------------------------
+# Hierarchical Cluster Analysis 
 
-# K-Modes Cluster Analysis
-cluster.results <-kmodes(aud_clean, 6 ,iter.max=100, weighted=FALSE) 
-print(cluster.results)
+# Average linkage (UPGMA)
+angler.jacd<-vegdist(angler,method='jaccard')
+anglercl.ave<-hclust(angler.jacd,method='average')
+plot(anglercl.ave) 
 
-# Append cluster assignment
-aud_clean$cluster <- factor(cluster.results$cluster)
+# clustering performance
+coef.hclust(anglercl.ave) 
+hclus.cophenetic(angler.jacd,anglercl.ave)
 
+# scree plot
+hclus.scree(anglercl.ave)
 
+# Ward's Method
+anglercl.ward<-hclust(angler.jacd,method='ward.D2')
+plot(anglercl.ward) 
+plot(anglercl.ave,main='Average-linkage Dendrogram',xlab='Anglers',ylab='Jaccard Dissimilar')
 
+# clustering performance
+
+coef.hclust(anglercl.ward) 
+hclus.cophenetic(angler.jacd,anglercl.ward)
+
+# scree plot
+hclus.scree(anglercl.ward)
+
+# ------------------------------------------------------------------------
+# Non-hierarchical Cluster Analysis 
+
+nhclus.scree(angler.jacd,max.k=30)
+
+anglercl.kmeans<-kmeans(angler.jacd,centers=10,iter.max=10000,nstart=25)
+anglercl.kmeans$cluster
+anglercl.class<-anglercl.kmeans$cluster
+names(anglercl.kmeans)
+
+plot(silhouette(anglercl.kmeans$cluster,angler.jacd))
+
+anglercl.kmeans.cas<-cascadeKM(angler.jacd,inf.gr=3,sup.gr=10,iter=100)
+plot(anglercl.kmeans.cas,sortg=T)
+anglercl.kmeans.cas$results
