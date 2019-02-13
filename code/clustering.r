@@ -1,7 +1,6 @@
-
 ###
-### K-Means clustering of lakes
-### run from top-level directory of angling repository
+### Clustering lakes by common angler visitation
+### Run from top-level directory of angling repository
 ###
 
 install.packages("vegan")
@@ -23,14 +22,26 @@ library("NbClust")
 library("clusteval")
 library("MASS")
 
+
 # ----------------------------------------------------------------------------
 # Read data and variable screening
-angler <- read.csv("./analysis/anglingXwater.csv", header=TRUE, na.strings=NULL, stringsAsFactors=F)
+aud <- read.csv("./analysis/anglingXwater.csv", header=TRUE, na.strings=NULL, stringsAsFactors=F)
 
-# remove first column containing user names
-angler[1]<-NULL
-str(angler)
-dim(angler)
+# Reformat and delete missing values
+aud$date <- as.Date(aud$date)
+aud$PERMANENT_IDENTIFIER <- as.numeric(aud$PERMANENT_IDENTIFIER)
+aud_clean <- na.omit(aud)
+
+# Analyse a subset of states
+aud_clean <- aud_clean[aud_clean$state=="WI", ]
+# aud_clean <- aud_clean[aud_clean$state=="WI" | aud_clean$state =="MN", ]
+
+# remove columns containing user names, date, and state
+aud_clean[c("bobber_id", "date", "state")]<-NULL
+aud_clean$latitude_cent<-as.numeric(aud_clean$latitude_cent)
+aud_clean$longitude_cent<-as.numeric(aud_clean$longitude_cent)
+str(aud_clean)
+dim(aud_clean)
 
 # abbreviate names (not used)
 #temp_names<-abbreviate(row.names(angler))
@@ -39,13 +50,13 @@ dim(angler)
 # Multivariate Resemblance 
 
 # CALCULATING COEFFICIENTS OF SIMILARITY FOR LAKES ACCORDING TO USER VISITATION
-angler.jac <- sim(angler, method = "jaccard")
+angler.jac <- sim(aud_clean, method = "jaccard")
 
 # ---------------------------------------------------------------------------
 # Hierarchical Cluster Analysis 
 
 # Average linkage (UPGMA)
-angler.jacd<-vegdist(angler,method='jaccard')
+angler.jacd<-vegdist(aud_clean,method='jaccard')
 anglercl.ave<-hclust(angler.jacd,method='average')
 plot(anglercl.ave) 
 
