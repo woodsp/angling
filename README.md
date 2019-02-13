@@ -6,3 +6,19 @@ Mobile technologies offer a novel opportunity to efficiently collect information
 
 The primary objective of this project is to leverage data from social media and mobile fishing applications to quantify angler activity and movement across the continental United States and assess species invasion risks associated with recreational fishing. Results will directly inform interagency management interventions at both local and landscape scales by quantifying angler movement networks and determining how they change through time. Heavily-used locations of fish activity (i.e., highly-connected network nodes) are prime targets for collaborative regulatory approaches that focus on the implementation of prevention strategies, such as watercraft inspection and cleaning stations to remove invasive species, and educational signage to discourage anglers from releasing live bait into waterbodies.
 
+
+## Workflow
+
+Gather the required inputs
+
+Run `spatialjoin.r`
+  requires angling events (iBobber_Jan25_2019.csv)
+  requires pre-processed NHD of waterbodies with correct FCode (NHD_H_National_GDB_Waterbody_39000-46599.gpkg
+  requires US state polygons (cb_2017_us_state_20m)
+  returns waterbody x state linking table
+  returns angling event to waterbody linking table
+  returns angling events table with waterbody metadata columns
+
+Run `clustering.r`
+
+
