@@ -21,7 +21,7 @@ library("pastecs")
 library("NbClust")
 library("clusteval")
 library("MASS")
-
+source("./code/biostats.R")
 
 # ----------------------------------------------------------------------------
 # Read data and variable screening
@@ -73,7 +73,6 @@ plot(anglercl.ward)
 plot(anglercl.ave,main='Average-linkage Dendrogram',xlab='Anglers',ylab='Jaccard Dissimilar')
 
 # clustering performance
-
 coef.hclust(anglercl.ward) 
 hclus.cophenetic(angler.jacd,anglercl.ward)
 
