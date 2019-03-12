@@ -9,7 +9,7 @@ library(data.table)
 # Read in anglingXwater
 aud <- read.csv("./analysis/anglingXwater_usa.csv", header = TRUE, colClasses = c("character", 
                   "character", "character", "numeric", "numeric", "character"))
-aud$date <- as.Date(aud$date, "%m/%d/%Y")
+mdy(aud$date)
 
 # Omit bobbers with only one trip
 aud.multitrip <- aud[aud$bobber_id %in% aud$bobber_id[duplicated(aud$bobber_id)],]
@@ -40,6 +40,9 @@ for (i in 1:(nrow(aud.multitrip)-1))
     movement <- rbind(movement, travel)
   }
 }
+
+# Write table to analyze
+write.csv(movement, "./analysis/sourceXdest.csv", row.names=F)
 
 # Old date calculation code
 #start <- Sys.time()
