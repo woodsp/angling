@@ -1,7 +1,7 @@
 # Install packages
-install.packages("lubridate")
-install.packages("plyr")
-install.packages("data.table")
+# install.packages("lubridate")
+# install.packages("plyr")
+# install.packages("data.table")
 library(plyr)
 library(lubridate)
 library(data.table)
@@ -30,14 +30,14 @@ aud.multitrip$dest_permid <- aud.multitrip$source_permid
 movement <- data.frame("bobber_id" = character(), "source_date" = character(), 
                        "source_permid" = character(), "dest_date" = character(), 
                        "dest_permid" = character(), "Index" = numeric())
-for(i in 1:(nrow(aud.multitrip)-1))
+for (i in 1:(nrow(aud.multitrip)-1))
 {
-  if(((aud.multitrip$bobber_id[i])==(aud.multitrip$bobber_id[i+1])) & ((aud.multitrip$source_permid[i])!=(aud.multitrip$source_permid[i+1])))
+  if ((aud.multitrip$bobber_id[i]==aud.multitrip$bobber_id[i+1]) & (aud.multitrip$source_permid[i]!=aud.multitrip$source_permid[i+1]))
   {
     source <- aud.multitrip[i, c("bobber_id", "source_date", "source_permid")]
     dest <- aud.multitrip[i+1, c("dest_date", "dest_permid")]
     travel <- cbind(source, dest)
-    angler.movement <- rbind(movement, travel)
+    movement <- rbind(movement, travel)
   }
 }
 
