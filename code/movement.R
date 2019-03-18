@@ -5,6 +5,7 @@
 library(plyr)
 library(lubridate)
 library(data.table)
+library(geosphere)
 
 # Read in anglingXwater
 aud <- read.csv("./analysis/anglingXwater_usa.csv", header = TRUE, colClasses = c("character", 
