@@ -6,3 +6,4 @@ angling.Rproj/*
 .Rhistory*
 *.Rproj
 .RData
+.RDataTmp
