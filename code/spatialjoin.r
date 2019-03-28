@@ -1,3 +1,8 @@
+# Notes from Spencer
+# Pull in full NHD
+# If polygon to polygon is too slow try centroid method
+
+
 ###
 ### Code to intersect angling trips with lake polygons
 ###   run this from the top level of the angling repository
@@ -31,8 +36,10 @@ angling_hotspots <- angling_hotspots_raw
 # Format timestamps
 angling_hotspots$timestamp <- ymd_hms(angling_hotspots$timestamp, tz="UTC")
 # split into cols for date and time (in Denver, mountain time)
-angling_hotspots$date <- as.Date(with_tz(angling_hotspots$timestamp, tzone="America/Denver"))
-angling_hotspots$hour <- hour(with_tz(angling_hotspots$timestamp, tzone="America/Denver"))
+angling_hotspots$date <- as.Date(angling_hotspots$timestamp, format = "%Y%m%d")
+angling_hotspots$hour <- hour(angling_hotspots$timestamp)
+#angling_hotspots$date <- as.Date(with_tz(angling_hotspots$timestamp, tzone="America/Denver"))
+#angling_hotspots$hour <- hour(with_tz(angling_hotspots$timestamp, tzone="America/Denver"))
 
 # drop extraneous variables
 angling_hotspots <- angling_hotspots[,c("hotspot_id", "latitude", "longitude", "bobber_id", "date", "hour")]
@@ -44,6 +51,7 @@ angling_hotspots <- angling_hotspots[which((angling_hotspots$date > "2016-12-31"
 angling_hotspots_sp <- SpatialPointsDataFrame(angling_hotspots[ ,c("longitude","latitude")], angling_hotspots, proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 angling_hotspots_sp <- spTransform(angling_hotspots_sp, CRS(albers))
 
+# Import CONUS shapefile and intersect with angling events
 
 ## Import/Munge Waterbodies
 # import state shapefile and reproject as required input
@@ -68,7 +76,8 @@ while (found == limit) {
     geosql <- paste("SELECT * FROM NHDWaterbody LIMIT", limit, "OFFSET", offset)
     print("elapsed time:"); print(proc.time() - ptm)
     print(paste("LOOP",cnt,geosql))
-    NHD_raw <- st_read(dsn="./data/NHD_H_National_GDB_Waterbody_39000-46599.gpkg", query=geosql)
+    NHD_raw <- st_read(dsn="./data/NHD_H_National_GDB_Waterbody.gdb", query=geosql)
+    # Here clip NHD raw by bounding box around continental U.S.
 
     # Lazy convert sf object back to SPDF (instead of recoding remaining fxns)
     NHD <- as_Spatial(st_zm(NHD_raw))
